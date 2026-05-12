@@ -185,7 +185,11 @@ def _init_session() -> None:
     if "merged_data" not in st.session_state:
         st.session_state.merged_data = None
     if "custom_metrics" not in st.session_state:
-        st.session_state.custom_metrics = {}
+        try:
+            from monster_analyst.src.helpers import load_custom_metrics
+            st.session_state.custom_metrics = load_custom_metrics()
+        except Exception:
+            st.session_state.custom_metrics = []
     if "active_dataset" not in st.session_state:
         st.session_state.active_dataset = None
     if "computed_metrics_df" not in st.session_state:
