@@ -1,0 +1,5 @@
+{
+  "schedule": "0 */6 * * *",
+  "max_concurrent": 2,
+  "timeout_minutes": 30
+}
