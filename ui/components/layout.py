@@ -17,7 +17,16 @@ def AppShell(key: str, title: str = "Meta Ads Commander v4", sidebar_content: Ca
     )
 
 
-def Sidebar(key: str, pages: list[tuple[str, str]] | None = None) -> str | None:
+def Sidebar(
+    key: str,
+    pages: list[tuple[str, str]] | None = None,
+    sections: dict[str, list[tuple[str, str]]] | None = None,
+) -> str | None:
+    """Sidebar navigation. Supports flat ``pages`` list or sectioned ``sections`` dict.
+
+    When *sections* is provided the sidebar renders collapsible section headers
+    with page buttons underneath.  Only one page is active at a time.
+    """
     state = StateManager()
     with st.sidebar:
         st.markdown(
@@ -27,13 +36,40 @@ def Sidebar(key: str, pages: list[tuple[str, str]] | None = None) -> str | None:
             '-webkit-background-clip:text;-webkit-text-fill-color:transparent;">'
             'Meta Ads Commander</h2>'
             '<p style="color:var(--text-tertiary);font-size:12px;margin:4px 0 0 0;'
-            'letter-spacing:1px;">v4.0 GENIUS</p></div>',
+            'letter-spacing:1px;">v4.0 GENIUS — Unified</p></div>',
             unsafe_allow_html=True,
         )
         st.divider()
-        if pages:
-            current_page = state.get("_current_page", "Dashboard")
-            icons = {p[0]: p[1] for p in pages} if pages and len(pages[0]) > 1 else {}
+
+        current_page = state.get("_current_page", "Dashboard")
+
+        if sections:
+            # Build flat list for icon lookup
+            icons: dict[str, str] = {}
+            for sec_pages in sections.values():
+                for name, icon in sec_pages:
+                    icons[name] = icon
+
+            for section_name, sec_pages in sections.items():
+                page_names = [p[0] for p in sec_pages]
+                is_active = current_page in page_names
+                with st.expander(f"**{section_name}**", expanded=is_active):
+                    for pname in page_names:
+                        icon = icons.get(pname, "")
+                        active = pname == current_page
+                        btn_type = "primary" if active else "secondary"
+                        if st.button(
+                            f"{icon}  {pname}",
+                            key=f"{key}_{pname}",
+                            use_container_width=True,
+                            type=btn_type,
+                        ):
+                            if not active:
+                                state.set("_current_page", pname)
+                                st.rerun()
+
+        elif pages:
+            icons = {p[0]: p[1] for p in pages}
             page_names = [p[0] for p in pages]
             selected = st.radio(
                 "Navigation",
@@ -45,6 +81,7 @@ def Sidebar(key: str, pages: list[tuple[str, str]] | None = None) -> str | None:
             )
             if selected != current_page:
                 state.set("_current_page", selected)
+
         st.divider()
         theme = state.get("theme", "dark")
         col1, col2 = st.columns(2)
