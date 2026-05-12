@@ -42,7 +42,7 @@ def save_custom_metrics(metrics: list):
 def render_quick_add_metric(page_key: str):
     """Render a 'Quick Add Custom Metric' expander. Call from any page."""
     import streamlit as st
-    from src.formula_engine import validate_formula
+    from monster_analyst.src.formula_engine import validate_formula
 
     with st.expander("Quick Add Custom Metric"):
         qc_name = st.text_input("Name", placeholder="My Custom Metric", key=f"{page_key}_qc_name")
