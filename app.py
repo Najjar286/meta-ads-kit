@@ -20,6 +20,7 @@ from core.entity_cascade import EntityCascade
 from core.demo_data import generate_insights, generate_entities
 from engines import create_metric_engine, AnalyticsEngine, AlertEngine, ExportEngine
 from ui.styles import inject_theme_css
+from monster_analyst.src.helpers import WINDOWS_11_CSS
 from ui.components import PageFooter, Sidebar
 
 # V4 Genius Core page views (take state, ec, df, engine args)
@@ -230,6 +231,7 @@ def main() -> None:
     state = StateManager()
     theme = state.get("theme", "dark")
     inject_theme_css(theme)
+    st.markdown(WINDOWS_11_CSS, unsafe_allow_html=True)
 
     current_page = Sidebar("main_sidebar", sections=_SECTIONS)
 
