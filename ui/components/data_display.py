@@ -71,7 +71,7 @@ def MetricTable(key: str, df: pd.DataFrame, metrics: list[str] | None = None,
         agg = {}
         if metrics:
             for m in metrics:
-                if m in display.columns:
+                if m in display.columns and m != group_by:
                     agg[m] = "mean" if display[m].dtype in ("float64", "int64") else "first"
         if agg:
             display = display.groupby(group_by).agg(agg).reset_index()
