@@ -134,13 +134,22 @@ class AnalyticsEngine:
 
     @staticmethod
     def compute_cohort_analysis(df: pd.DataFrame, date_col: str = "date_start",
-                                metric_col: str = "spend") -> pd.DataFrame:
+                                metric_col: str = "spend",
+                                group_col: str = "campaign_id") -> pd.DataFrame:
         if df is None or df.empty or date_col not in df.columns or metric_col not in df.columns:
             return pd.DataFrame()
         data = df.copy()
         data[date_col] = pd.to_datetime(data[date_col])
-        data["cohort_week"] = data[date_col].dt.isocalendar().week.astype(int)
         data["period_week"] = data[date_col].dt.isocalendar().week.astype(int)
+        if group_col in data.columns:
+            first_appearance = data.groupby(group_col)[date_col].min().reset_index()
+            first_appearance["cohort_week"] = pd.to_datetime(
+                first_appearance[date_col]
+            ).dt.isocalendar().week.astype(int)
+            first_appearance = first_appearance[[group_col, "cohort_week"]]
+            data = data.merge(first_appearance, on=group_col, how="left")
+        else:
+            data["cohort_week"] = data["period_week"]
         pivot = data.groupby(["cohort_week", "period_week"])[metric_col].sum().reset_index()
         cohort_table = pivot.pivot(index="cohort_week", columns="period_week", values=metric_col)
         first_week_values = cohort_table.iloc[:, 0] if not cohort_table.empty else pd.Series()

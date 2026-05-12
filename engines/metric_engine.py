@@ -52,10 +52,12 @@ class MetricEngine:
         self._metrics[metric_def.name] = metric_def
 
     def _cache_key(self, df: pd.DataFrame, metric_names: list[str]) -> str:
+        data_hash = hashlib.md5(
+            pd.util.hash_pandas_object(df, index=True).values.tobytes()
+        ).hexdigest()
         info = {
             "shape": list(df.shape),
-            "cols": sorted(df.columns.tolist()),
-            "dtypes": {c: str(d) for c, d in df.dtypes.items()},
+            "data_hash": data_hash,
             "metrics": sorted(metric_names),
         }
         return hashlib.md5(json.dumps(info, sort_keys=True).encode()).hexdigest()

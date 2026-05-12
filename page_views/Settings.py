@@ -40,7 +40,9 @@ def render(state: StateManager, entity_cascade: EntityCascade,
     c1, c2 = st.columns(2)
     with c1:
         if ActionButton("regen_data", "Regenerate Demo Data", icon="🔄"):
-            st.cache_data.clear()
+            del st.session_state["df_raw"]
+            if metric_engine:
+                metric_engine.clear_cache()
             SuccessMessage("regen_ok", "Demo data regenerated")
             st.rerun()
     with c2:
